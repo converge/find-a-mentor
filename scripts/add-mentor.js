@@ -27,7 +27,16 @@ const spinnerPush = new Ora({
 });
 
 async function gitPull() {
-  await execa('git', ['pull']);
+  // output "git remote -v" to gitRemoteUrl
+  const gitRemoteUrl = await execa.sync('git', ['remote', '-v']).stdout;
+  // check if repository requires password
+  if (gitRemoteUrl.includes('origin	git@')) {
+    console.log('\nGitHub password required to "git pull"');
+    // execute git synchronously to wait for the password
+    await execa.sync('git', ['pull']);
+  } else {
+    await execa('git', ['pull']);
+  }
 }
 
 async function gitBranch(name) {
